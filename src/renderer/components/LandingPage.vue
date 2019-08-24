@@ -10,6 +10,7 @@
               placeholder="Search"
               v-model="keyword"
               @input="clear"
+              autofocus
               ></b-input>
 
             <b-button type="submit" variant="outline-primary">Seach</b-button>
@@ -75,9 +76,23 @@
       shell: function shell(cmd) {
         const exec = require('child_process').exec;
         return new Promise((resolve, reject) => {
-          exec(cmd, (error, stdout, stderr) => {
-            resolve(stdout)
-            //resolve(stdout? stdout : stderr);
+          exec(cmd, {maxBuffer: 1024 * 1000}, (error, stdout, stderr) => {
+            resolve(stdout? stdout : stderr);
+          });
+        });
+      },
+      run_script: function run_script(command, args, callback) {
+        var child_process = require('child_process');
+
+        return new Promise((resolve, reject) => {
+          console.log("Starting Process.");
+          var child = child_process.spawn(command, args);
+
+
+          child.stdout.setEncoding('utf8');
+          child.stdout.on('data', function(data) {
+            console.log('stdout: ' + data);
+            resolve(data);
           });
         });
       },
@@ -92,20 +107,31 @@
         this.run_grep(keyword)
       },
       run_grep: function(keyword){
-        const grep = this.shell(`grep -r ${keyword} ${dir}`);
 
-        grep.then(data => { 
-          this.grepArray = data.split("\n").map(str => {
-            return JSON.parse(`{"row": "${str}"}`)
-          })
-          this.grep = false
+      //this.run_script("ls", ["-l", "/home"], function(output, exit_code) {
+
+      //  console.log("Process Finished.");
+      //  console.log('closing code: ' + exit_code);
+      //  console.log('Full output of script: ',output);
+      //});
+        
+        //const grep = this.run_script("grep", ["-r", `${keyword}`, `${dir}/app ${dir}/db ${dir}/spec`]);
+      const grep = this.shell(`grep -r ${keyword} ${dir}/app`);
+      grep.then(data => { 
+        this.grepArray = data.split("\n").map(str => {
+          str = str.split(dir)[1]
+          return JSON.parse(`{"row": "${str}"}`);
         })
+        this.grep = false
+      })
+
       },
       run_find: function(keyword){
-        const find = this.shell(`find ${dir} -name "*${keyword}*"`);
+        const find = this.shell(`find ${dir}/app ${dir}/db ${dir}/spec -name "*${keyword}*"`);
 
         find.then(data => { 
           this.findArray = data.split("\n").map(str => {
+            str = str.split(dir)[1]
             return JSON.parse(`{"row": "${str}"}`)
           })
           this.find = false
@@ -142,5 +168,8 @@
 			font-size: 12px;
 		}
 	}
+}
+::-webkit-scrollbar {
+    display: none;
 }
 </style>

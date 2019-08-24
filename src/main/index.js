@@ -18,11 +18,14 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 863,
     useContentSize: true,
-    width: 1000
+    width: 700,
+    titleBarStyle: 'hidden',
+    scrollBounce: true
   })
 
+  mainWindow.setPosition(70,90)
   mainWindow.loadURL(winURL)
 
   mainWindow.webContents.on('did-finish-load', () => {

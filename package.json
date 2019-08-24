@@ -18,11 +18,21 @@
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
     "dist:linux": "electron-builder --linux",
-    "postinstall": ""
+    "postinstall": "",
+    "start-hot": "cross-env HOT=1 NODE_ENV=development electron -r babel-register -r babel-polyfill ./main.development",
+    "start": "cross-env NODE_ENV=production electron ./"
   },
   "build": {
     "productName": "search-app",
     "appId": " cIvanrc.search-app",
+    "linux": {
+      "target": [
+        "deb",
+        "snap",
+        "rpm",
+        "pacman"
+      ]
+    },
     "directories": {
       "output": "build"
     },
